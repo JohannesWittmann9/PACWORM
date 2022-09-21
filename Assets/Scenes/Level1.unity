@@ -159,7 +159,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
+  m_BackGroundColor: {r: 0.3490566, g: 0.3490566, b: 0.3490566, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -2597,6 +2597,23 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &534032108 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3953828577284016875, guid: 88ee37674b88f6840b2cc5905bd2b975, type: 3}
+  m_PrefabInstance: {fileID: 3953828577611725431}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &534032112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 534032108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e89200c3c3c2354986c4cd00f4fc29d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &551219796
 GameObject:
   m_ObjectHideFlags: 0
@@ -9829,6 +9846,14 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -7665134418472334619, guid: 88ee37674b88f6840b2cc5905bd2b975, type: 3}
+      propertyPath: movementSpeed
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -7665134418472334619, guid: 88ee37674b88f6840b2cc5905bd2b975, type: 3}
+      propertyPath: playerMovementClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 4dd5548f8138f4645bb52a324b469489, type: 3}
     - target: {fileID: 3953828577284016872, guid: 88ee37674b88f6840b2cc5905bd2b975, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -9843,11 +9868,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3953828577284016872, guid: 88ee37674b88f6840b2cc5905bd2b975, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.42
+      value: -0.61
       objectReference: {fileID: 0}
     - target: {fileID: 3953828577284016872, guid: 88ee37674b88f6840b2cc5905bd2b975, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -7.29
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 3953828577284016872, guid: 88ee37674b88f6840b2cc5905bd2b975, type: 3}
       propertyPath: m_LocalPosition.z
