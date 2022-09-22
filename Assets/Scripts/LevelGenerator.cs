@@ -24,6 +24,7 @@ public class LevelGenerator : MonoBehaviour
         {0,0,0,0,0,0,5,0,0,0,4,0,0,0},
     };
 
+    public Vector3 topLeft;
     public GameObject outsideCorner;
     public GameObject outsideWall;
     public GameObject insideCorner;
@@ -40,7 +41,6 @@ public class LevelGenerator : MonoBehaviour
         int[,] copy = (int[,])levelMap.Clone();
         Destroy(GameObject.Find("Level1"));
 
-        Vector3 topLeft = new Vector3(-13, 8, 0);
         CreateLevel(topLeft);
 
         Vector3 topRight = topLeft;
@@ -60,373 +60,6 @@ public class LevelGenerator : MonoBehaviour
 
     }
 
-
-    private void CreateLevel(Vector3 startPos)
-    {
-        
-
-        for (int i = 0; i < levelMap.GetLength(0); i++)
-        {
-            for (int j = 0; j < levelMap.GetLength(1); j++)
-            {
-                int number = levelMap[i, j];
-                GameObject prefab = GetGameObjectForNumber(number);
-                Vector3 position = startPos;
-                position.x += j;
-                position.y -= i;
-
-                if (prefab == null)
-                {
-                    continue;
-                }
-
-                else if (number == 5 || number == 6)
-                {
-                    InstantiateNewTile(prefab, position, Quaternion.identity);
-                    continue;
-                }
-
-                else if (i == 0 && j == 0)
-                {
-                    InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 270));
-                    continue;
-                }
-
-                else if (i == 0 && j != 0)
-                {
-                    int prev = levelMap[i, j - 1];
-
-                    if (number == 2 && (prev == 1 || prev == 2 || prev == 7))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    else if (number == 1 && prev == 2)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-                    else if (number == 7)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-                    else if (prev == 0 && number == 1)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 270));
-                        continue;
-                    }
-                }
-
-                else if (i != 0 && j == 0)
-                {
-                    int prevUp = levelMap[i - 1, j];
-
-                    if ((prevUp == 2 || prevUp == 1) && number == 2)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (prevUp == 2 && number == 1)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.identity);
-                        continue;
-                    }
-                    else if ((prevUp == 0 || prevUp == 5 || prevUp == 6) && number == 1)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 270));
-                        continue;
-                    }
-                    else if ((prevUp == 0 || prevUp == 5 || prevUp == 6) && (number == 2 || number == 7))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                }
-
-                else if (i != 0 && j != 0 && j < (levelMap.GetLength(1) - 1) && i < (levelMap.GetLength(0) - 1))
-                {
-                    int prevUp = levelMap[i - 1, j];
-                    int prevLeft = levelMap[i, j - 1];
-                    int nextDown = levelMap[i + 1, j];
-                    int nextRight = levelMap[i, j + 1];
-                    int downRight = levelMap[i + 1, j + 1];
-                    int upRight = levelMap[i - 1, j + 1];
-                    int downLeft = levelMap[i + 1, j - 1];
-                    int upLeft = levelMap[i - 1, j - 1];
-
-                    if (IsItemOrEmpty(prevUp) && number == 4)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    // I dont actually think a junction can be used here, but for safety
-                    else if (IsItemOrEmpty(prevUp) && number == 7)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-                    else if (IsItemOrEmpty(prevUp) && prevLeft == 4 && number == 4)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    else if (!IsItemOrEmpty(prevUp) && !IsItemOrEmpty(prevLeft) && number == 3 && !IsItemOrEmpty(nextRight)
-                        && !IsItemOrEmpty(nextDown) && IsItemOrEmpty(downRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 270));
-                        continue;
-                    }
-                    else if (!IsItemOrEmpty(prevUp) && !IsItemOrEmpty(prevLeft) && number == 3 && !IsItemOrEmpty(nextRight)
-                        && !IsItemOrEmpty(nextDown) && IsItemOrEmpty(upRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    else if (!IsItemOrEmpty(prevUp) && !IsItemOrEmpty(prevLeft) && number == 3 && !IsItemOrEmpty(nextRight)
-                        && !IsItemOrEmpty(nextDown) && IsItemOrEmpty(downLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-                    else if (!IsItemOrEmpty(prevUp) && !IsItemOrEmpty(prevLeft) && number == 3 && !IsItemOrEmpty(nextRight)
-                        && !IsItemOrEmpty(nextDown) && IsItemOrEmpty(upLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (IsItemOrEmpty(prevUp) && prevLeft == 4 && number == 3 && IsItemOrEmpty(nextRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-                    else if (IsItemOrEmpty(prevUp) && prevLeft == 4 && number == 3 && !IsItemOrEmpty(nextRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 270));
-                        continue;
-                    }
-                    else if (IsItemOrEmpty(prevUp) && IsItemOrEmpty(prevLeft) && number == 3)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 270));
-                        continue;
-                    }
-                    else if ((prevUp == 4 || prevUp == 3) && IsItemOrEmpty(prevLeft) && number == 3)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    else if (prevLeft == 4 && number == 3 && IsItemOrEmpty(nextRight) && IsItemOrEmpty(prevUp))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-                    else if (prevLeft == 4 && number == 3 && IsItemOrEmpty(nextRight) && !IsItemOrEmpty(prevUp))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (prevLeft == 4 && number == 3 && !IsItemOrEmpty(nextRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    else if ((prevLeft == 4 || prevLeft == 3) && number == 4 && !IsItemOrEmpty(nextRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    else if ((prevLeft == 4 || prevLeft == 3) && number == 4 && IsItemOrEmpty(nextRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (IsItemOrEmpty(prevLeft) && number == 4)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (prevLeft == 3 && number == 3 && IsItemOrEmpty(prevUp))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-                    else if (prevLeft == 3 && number == 3 && IsItemOrEmpty(nextDown))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (prevUp == 7 && number == 4)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (prevUp == 7 && number == 3 && IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (prevUp == 7 && number == 3 && !IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-
-                    // Outer tiles
-                    else if (prevLeft == 1 && number == 2)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    else if (prevLeft == 2 && number == 2 && IsItemOrEmpty(prevUp))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    else if (prevLeft == 2 && number == 2 && !IsItemOrEmpty(prevUp))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (number == 1 && IsItemOrEmpty(prevUp) && IsItemOrEmpty(nextRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-                    else if (number == 1 && IsItemOrEmpty(nextDown) && IsItemOrEmpty(nextRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (number == 1 && IsItemOrEmpty(prevUp) && IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 270));
-                        continue;
-                    }
-                    else if (number == 1 && IsItemOrEmpty(nextDown) && IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    else if (prevLeft == 2 && number == 1 && !IsItemOrEmpty(prevUp))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (prevUp == 1 && number == 2)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (prevUp == 2 && number == 1 && IsItemOrEmpty(nextRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (prevUp == 2 && number == 1 && !IsItemOrEmpty(nextRight))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    else if (prevUp == 7 && number == 2)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    else if (prevUp == 2 && number == 2 && IsItemOrEmpty(nextRight) && IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    
-
-                }
-                else if (i == (levelMap.GetLength(0) - 1) && j != (levelMap.GetLength(1) - 1) && i != 0)
-                {
-                    int prevUp = levelMap[i - 1, j];
-                    int nextRight = levelMap[i, j + 1];
-                    int prevLeft = levelMap[i, j + -1];
-
-                    if (prevUp == 4 && number == 4 && IsItemOrEmpty(nextRight) && IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    if (prevUp == 4 && number == 3 && !IsItemOrEmpty(nextRight) && IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    if (prevUp == 4 && number == 3 && IsItemOrEmpty(nextRight) && prevLeft == 4)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    if (prevUp == 3 && number == 3 && IsItemOrEmpty(nextRight) && !IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    if (prevUp == 3 && number == 3 && !IsItemOrEmpty(nextRight) && IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-
-                }
-                else if (j == (levelMap.GetLength(1) - 1) && j != 0 && i != (levelMap.GetLength(0) - 1))
-                {
-                    int prevUp = levelMap[i - 1, j];
-                    int prevLeft = levelMap[i, j -1];
-                    int nextDown = levelMap[i + 1, j];
-
-                    if ((prevUp == 7 || prevUp == 4 || prevUp == 3) && number == 4 && IsItemOrEmpty(prevLeft) && !IsItemOrEmpty(nextDown))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-
-                    if (number == 4 && IsItemOrEmpty(nextDown))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    if (number == 4 && IsItemOrEmpty(prevUp) && !IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-
-                    if (number == 3 && !IsItemOrEmpty(nextDown) && !IsItemOrEmpty(prevLeft) && IsItemOrEmpty(prevUp))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-
-                    if (number == 3 && IsItemOrEmpty(nextDown) && IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 0));
-                        continue;
-                    }
-                    if (number == 3 && IsItemOrEmpty(nextDown) && !IsItemOrEmpty(prevLeft) && prevUp == 4)
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 90));
-                        continue;
-                    }
-                    if (number == 3 && !IsItemOrEmpty(nextDown) && !IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-                    if (number == 3 && !IsItemOrEmpty(nextDown) && !IsItemOrEmpty(prevLeft))
-                    {
-                        InstantiateNewTile(prefab, position, Quaternion.Euler(0, 0, 180));
-                        continue;
-                    }
-
-                }
-            }
-        }
-    }
 
     private GameObject GetGameObjectForNumber(int number)
     {
@@ -460,6 +93,179 @@ public class LevelGenerator : MonoBehaviour
     private bool IsItemOrEmpty(int num)
     {
         return num == 0 || num == 5 || num == 6;
+    }
+
+    private void CreateLevel(Vector3 startPos)
+    {
+        int y = levelMap.GetLength(0);
+        int x = levelMap.GetLength(1);
+
+        for (int i = 0; i < y; i++)
+        {
+            for (int j = 0; j < x; j++)
+            {
+                // Fields around current
+                // 8 just to store a none tile
+                int left = 8;
+                int right = 8;
+                int top = 8;
+                int bottom = 8;
+                int leftTop = 8;
+                int rightTop = 8;
+                int leftBottom = 8;
+                int rightBottom = 8;
+
+                int number = levelMap[i, j];
+                GameObject prefab = GetGameObjectForNumber(number);
+                Vector3 position = startPos;
+                position.x += j;
+                position.y -= i;
+
+                // Set all fields around
+                if(i > 0)
+                {
+                    top = levelMap[i - 1, j];
+                }
+                if(j > 0)
+                {
+                    left = levelMap[i, j - 1];
+                }
+                if(i < (y - 1))
+                {
+                    bottom = levelMap[i + 1, j];
+                }
+                if(j < (x - 1))
+                {
+                    right = levelMap[i, j + 1];
+                }
+                if(i > 0 && j < (x - 1))
+                {
+                    rightTop = levelMap[i - 1, j + 1];
+                }
+                if (j > 0 && i > 0)
+                {
+                    leftTop = levelMap[i - 1, j - 1];
+                }
+                if (i < (y - 1) && j < (x - 1))
+                {
+                    rightBottom = levelMap[i + 1, j + 1];
+                }
+                if (j > 0 && i < (y - 1))
+                {
+                    leftBottom = levelMap[i + 1, j - 1];
+                }
+
+                // Field is Empty
+                if (prefab == null)
+                {
+                    continue;
+                }
+                // Field is Item
+                else if (number == 5 || number == 6)
+                {
+                    InstantiateNewTile(prefab, position, Quaternion.identity);
+                    continue;
+                }
+                // Field is Wall
+                else if (IsWall(number))
+                {
+                    Quaternion q;
+                    if(IsItemOrEmpty(top) || IsItemOrEmpty(bottom))
+                    {
+                        q = Quaternion.Euler(0, 0, 0);
+                    }
+                    else //if(IsItemOrEmpty(left) || IsItemOrEmpty(right))
+                    {
+                        q = Quaternion.Euler(0, 0, 90);
+                    }
+
+                    InstantiateNewTile(prefab, position, q);
+                    continue;
+                }
+                // Field is Corner
+                else if (number == 1 || number == 3)
+                {
+                    Quaternion q = Quaternion.identity;
+                    if (IsItemOrEmpty(top) && IsItemOrEmpty(right))
+                    {
+                        q = Quaternion.Euler(0, 0, 180);
+                    }
+                    else if(IsItemOrEmpty(bottom) && IsItemOrEmpty(right))
+                    {
+                        q = Quaternion.Euler(0, 0, 90);
+                    }
+                    else if (IsItemOrEmpty(top) && IsItemOrEmpty(left))
+                    {
+                        q = Quaternion.Euler(0, 0, 270);
+                    }
+                    else if (IsItemOrEmpty(bottom) && IsItemOrEmpty(left))
+                    {
+                        q = Quaternion.Euler(0, 0, 0);
+                    }
+                    else if (IsWall(right) && IsWall(bottom) && IsItemOrEmpty(rightBottom))
+                    {
+                        q = Quaternion.Euler(0, 0, 270);
+                    }
+                    else if (IsWall(right) && IsWall(top) && IsItemOrEmpty(rightTop))
+                    {
+                        q = Quaternion.Euler(0, 0, 0);
+                    }
+                    else if (IsWall(left) && IsWall(bottom) && IsItemOrEmpty(leftBottom))
+                    {
+                        q = Quaternion.Euler(0, 0, 180);
+                    }
+                    else if (IsWall(left) && IsWall(top) && IsItemOrEmpty(leftTop))
+                    {
+                        q = Quaternion.Euler(0, 0, 90);
+                    }
+
+                    InstantiateNewTile(prefab, position, q);
+                    continue;
+                }
+                // Field is junction
+                else if(number == 7)
+                {
+                    Quaternion q = Quaternion.identity;
+                    if (IsWall(right) && IsWall(bottom) && IsItemOrEmpty(rightBottom) && IsOutOfMapOrItem(left) && !IsOutOfMapOrItem(top))
+                    {
+                        q = Quaternion.Euler(0, 0, 270);
+                    }
+                    else if (IsWall(right) && IsWall(bottom) && IsItemOrEmpty(rightBottom) && IsOutOfMapOrItem(top))
+                    {
+                        q = Quaternion.Euler(0, 0, 180);
+                    }
+                    else if (IsWall(right) && IsWall(top) && IsItemOrEmpty(rightTop) && IsOutOfMapOrItem(left) && !IsOutOfMapOrItem(bottom))
+                    {
+                        q = Quaternion.Euler(0, 0, 270);
+                    }
+                    else if (IsWall(right) && IsWall(top) && IsItemOrEmpty(rightTop) && IsOutOfMapOrItem(bottom))
+                    {
+                        q = Quaternion.Euler(0, 0, 0);
+                    }
+                    else if (IsWall(left) && IsWall(bottom) && IsItemOrEmpty(leftBottom) && IsOutOfMapOrItem(right) && !IsOutOfMapOrItem(top))
+                    {
+                        q = Quaternion.Euler(0, 0, 90);
+                    }
+                    else if (IsWall(left) && IsWall(bottom) && IsItemOrEmpty(leftBottom) && IsOutOfMapOrItem(top))
+                    {
+                        q = Quaternion.Euler(0, 0, 180);
+                    }
+                    else if (IsWall(left) && IsWall(top) && IsItemOrEmpty(leftTop) && IsOutOfMapOrItem(right) && !IsOutOfMapOrItem(bottom))
+                    {
+                        q = Quaternion.Euler(0, 0, 90);
+                    }
+                    else if (IsWall(left) && IsWall(top) && IsItemOrEmpty(leftTop) && IsOutOfMapOrItem(bottom))
+                    {
+                            q = Quaternion.Euler(0, 0, 0);
+                    }
+                    
+
+                    InstantiateNewTile(prefab, position, q);
+                    continue;
+                }
+
+            }
+        }
     }
 
     private int[,] RotateY180(int[,] array)
@@ -498,4 +304,13 @@ public class LevelGenerator : MonoBehaviour
         return result;
     }
 
+    private bool IsWall(int number)
+    {
+        return number == 2 || number == 4;
+    }
+
+    private bool IsOutOfMapOrItem(int number)
+    {
+        return number == 8 || IsItemOrEmpty(number);
+    }
 }
