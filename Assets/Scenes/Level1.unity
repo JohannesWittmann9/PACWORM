@@ -3675,6 +3675,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc9f3c75eac2a2c438fb0559c7c8ac63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  topLeft: {x: -3.5, y: 6.5, z: 0}
   outsideCorner: {fileID: 6718820669753802018, guid: d54f486508e8fe846aabc11ebe21a8c2, type: 3}
   outsideWall: {fileID: 3098241323670384700, guid: 99ac0f6181bb058488a25f8d46a2ebdf, type: 3}
   insideCorner: {fileID: 2538368948248724609, guid: 878c83423ed50584fa958ca1d3d24b0c, type: 3}
@@ -4143,7 +4144,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1543210545}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.4, y: -7.44, z: 0}
+  m_LocalPosition: {x: -5.24, y: -6.93, z: 0}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10033,7 +10034,7 @@ PrefabInstance:
     - target: {fileID: -7665134418472334619, guid: 88ee37674b88f6840b2cc5905bd2b975, type: 3}
       propertyPath: playerMovementClip
       value: 
-      objectReference: {fileID: 8300000, guid: 4dd5548f8138f4645bb52a324b469489, type: 3}
+      objectReference: {fileID: 8300000, guid: c381b1e5467e3ea4d97d8ac8b2d44c9b, type: 3}
     - target: {fileID: 3953828577284016872, guid: 88ee37674b88f6840b2cc5905bd2b975, type: 3}
       propertyPath: m_RootOrder
       value: 6
