@@ -3713,11 +3713,11 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 0
+  m_audioClip: {fileID: 8300000, guid: 8f18fcd7628eccb4d818d8cf232bee5e, type: 3}
+  m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -3821,7 +3821,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1439946490}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15ae1cc921795c147a8e221d4757ce42, type: 3}
   m_Name: 
@@ -9535,14 +9535,6 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 0}
-      propertyPath: movementSpeed
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 0}
-      propertyPath: playerMovementClip
-      value: 
-      objectReference: {fileID: 8300000, guid: c381b1e5467e3ea4d97d8ac8b2d44c9b, type: 3}
     - target: {fileID: 3953828577284016872, guid: 88ee37674b88f6840b2cc5905bd2b975, type: 3}
       propertyPath: m_RootOrder
       value: 3
