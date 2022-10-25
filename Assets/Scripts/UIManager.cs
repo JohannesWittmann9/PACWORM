@@ -8,7 +8,14 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
+        DontDestroyOnLoad(this);
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
 
+    private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMoad)
+    {
+        if (scene.buildIndex == 1) GameObject.FindGameObjectWithTag("ExitButton").GetComponent<Button>().onClick.AddListener(QuitGame);
+        
     }
 
     void Update()
@@ -40,5 +47,6 @@ public class UIManager : MonoBehaviour
     {
         UnityEditor.EditorApplication.isPlaying = false;
     }
+
 
 }
