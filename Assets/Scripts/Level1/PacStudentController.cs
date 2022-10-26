@@ -11,11 +11,13 @@ public class PacStudentController : MonoBehaviour
     [SerializeField] AudioClip pacWallClip;
 
     private GameObject[] tiles;
+    private GameObject[] collectibles;
     private Tweener tweener;
     private AudioSource audioSource;
     private Animator animator;
     private KeyCode lastInput;
     private KeyCode currentInput;
+    private ParticleSystem particleSys;
 
     // Start is called before the first frame update
     void Start()
@@ -23,14 +25,13 @@ public class PacStudentController : MonoBehaviour
         tweener = GetComponent<Tweener>();
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
-        tiles = GameObject.FindGameObjectsWithTag("NonWalkable");
-
+        particleSys = GameObject.Find("PacStudentParticleSystem").GetComponent<ParticleSystem>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        IsWalkable(transform.position);
+
         if (Input.GetKey(KeyCode.W))
         {
             lastInput = KeyCode.W;
@@ -53,10 +54,17 @@ public class PacStudentController : MonoBehaviour
             PlayMovementClip();
         }
 
-        bool canWalk = ComputeInput(lastInput);
-        if (!canWalk) ComputeInput(currentInput);
-
+        if(lastInput != KeyCode.None)
+        {
+            bool canWalk = ComputeInput(lastInput);
+            if (!canWalk) ComputeInput(currentInput);
+        }
         
+    }
+
+    private void FixedUpdate()
+    {
+        TryCollectItem();
     }
 
     private void PlayMovementClip()
@@ -75,12 +83,20 @@ public class PacStudentController : MonoBehaviour
             audioSource.clip = pacWallClip;
             audioSource.Play();
         }
+    }
+
+    private void PlayCollectClip()
+    {
+        audioSource.Stop();
+        audioSource.clip = pacEatClip;
+        audioSource.Play();
         
     }
 
     private bool IsWalkable(Vector3 newPos)
     {
-        foreach(GameObject tile in tiles)
+        tiles = GameObject.FindGameObjectsWithTag("NonWalkable");
+        foreach (GameObject tile in tiles)
         {
             float distance = Vector3.Distance(tile.transform.position, newPos);
             if(distance < 0.5f)
@@ -92,6 +108,26 @@ public class PacStudentController : MonoBehaviour
         return true;
     }
 
+    private GameObject GetCollectible()
+    { 
+        collectibles = GameObject.FindGameObjectsWithTag("Collectible");
+
+        for (int i = 0; i < collectibles.Length; i++)
+        {
+            GameObject obj = collectibles[i];
+            if(obj != null)
+            {
+                float distance = Vector3.Distance(transform.position, obj.transform.position);
+                if (distance < 0.5f)
+                {
+                    return obj;
+                }
+            }
+            
+        }
+        return null;
+    }
+
     private bool ComputeInput(KeyCode input)
     {
         if (!tweener.TweenExists(transform))
@@ -100,11 +136,12 @@ public class PacStudentController : MonoBehaviour
             animator.SetBool("walkDown", false);
             animator.SetBool("walkRight", false);
             animator.SetBool("walkLeft", false);
+            Vector3 newPos;
 
             switch (input)
             {
                 case KeyCode.W:
-                    Vector3 newPos = new Vector3(transform.position.x, transform.position.y + 1);
+                    newPos = new Vector3(transform.position.x, transform.position.y + 1);
                     if (IsWalkable(newPos))
                     {
                         currentInput = input;
@@ -150,8 +187,17 @@ public class PacStudentController : MonoBehaviour
 
             return false;
         }
-
         /* When there is no tween we dont want to check current input */
         return true;
+    }
+
+    private void TryCollectItem()
+    {
+        GameObject item = GetCollectible();
+        if (item != null)
+        {
+            item.SetActive(false);
+            PlayCollectClip();
+        }
     }
 }
