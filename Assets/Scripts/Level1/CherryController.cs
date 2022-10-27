@@ -71,7 +71,8 @@ public class CherryController : MonoBehaviour
         }
         
         cherry.transform.position = startPoint;
-        Vector3 endPos = new Vector3(posCam.x, posCam.y, 0) - startPoint;
+        Vector3 middlePoint = new Vector3(posCam.x, posCam.y, 0);
+        Vector3 endPos = middlePoint - (startPoint - middlePoint);
         tweener.AddTween(cherry.transform, cherry.transform.position, endPos, speed);
     }
 
