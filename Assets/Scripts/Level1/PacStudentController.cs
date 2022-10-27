@@ -9,6 +9,7 @@ public class PacStudentController : MonoBehaviour
     [SerializeField] AudioClip pacMovementClip;
     [SerializeField] AudioClip pacEatClip;
     [SerializeField] AudioClip pacWallClip;
+    [SerializeField] ParticleSystem particleSys;
 
     private GameObject[] tiles;
     private GameObject[] collectibles;
@@ -17,7 +18,7 @@ public class PacStudentController : MonoBehaviour
     private Animator animator;
     private KeyCode lastInput;
     private KeyCode currentInput;
-    private ParticleSystem particleSys;
+   
 
     // Start is called before the first frame update
     void Start()
@@ -25,7 +26,6 @@ public class PacStudentController : MonoBehaviour
         tweener = GetComponent<Tweener>();
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
-        particleSys = GameObject.Find("PacStudentParticleSystem").GetComponent<ParticleSystem>();
     }
 
     // Update is called once per frame
@@ -147,6 +147,7 @@ public class PacStudentController : MonoBehaviour
                         currentInput = input;
                         tweener.AddTween(transform, transform.position, newPos, moveDuration);
                         animator.SetBool("walkUp", true);
+                        PlayParticles();
                         return true;
                     }
                     break;
@@ -157,6 +158,7 @@ public class PacStudentController : MonoBehaviour
                         currentInput = input;
                         tweener.AddTween(transform, transform.position, newPos, moveDuration);
                         animator.SetBool("walkLeft", true);
+                        PlayParticles();
                         return true;
                     }
                     break;
@@ -167,6 +169,7 @@ public class PacStudentController : MonoBehaviour
                         currentInput = input;
                         tweener.AddTween(transform, transform.position, newPos, moveDuration);
                         animator.SetBool("walkDown", true);
+                        PlayParticles();
                         return true;
                     }
 
@@ -178,6 +181,7 @@ public class PacStudentController : MonoBehaviour
                         currentInput = input;
                         tweener.AddTween(transform, transform.position, newPos, moveDuration);
                         animator.SetBool("walkRight", true);
+                        PlayParticles();
                         return true;
                     }
                     break;
@@ -199,5 +203,10 @@ public class PacStudentController : MonoBehaviour
             item.SetActive(false);
             PlayCollectClip();
         }
+    }
+
+    private void PlayParticles()
+    {
+        particleSys.Play();
     }
 }
