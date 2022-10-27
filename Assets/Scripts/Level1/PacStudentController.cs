@@ -9,7 +9,8 @@ public class PacStudentController : MonoBehaviour
     [SerializeField] AudioClip pacMovementClip;
     [SerializeField] AudioClip pacEatClip;
     [SerializeField] AudioClip pacWallClip;
-    [SerializeField] ParticleSystem particleSys;
+    [SerializeField] ParticleSystem pacPS;
+    [SerializeField] ParticleSystem bumpPS;
 
     private GameObject[] tiles;
     private GameObject[] collectibles;
@@ -18,6 +19,7 @@ public class PacStudentController : MonoBehaviour
     private Animator animator;
     private KeyCode lastInput;
     private KeyCode currentInput;
+    private bool hasBumped = false;
    
 
     // Start is called before the first frame update
@@ -56,8 +58,18 @@ public class PacStudentController : MonoBehaviour
 
         if(lastInput != KeyCode.None)
         {
-            bool canWalk = ComputeInput(lastInput);
-            if (!canWalk) ComputeInput(currentInput);
+            Vector3 newPos = Vector3.zero;
+            bool canWalk = ComputeInput(lastInput, ref newPos);
+            if (!canWalk)
+            {
+                canWalk = ComputeInput(currentInput, ref newPos);
+                Vector3 pos = newPos + ((this.transform.position - newPos) / 2);
+                if(!canWalk && !hasBumped)PlayWallBump(pos);
+            }
+            else
+            {
+                hasBumped = false;
+            }
         }
         
     }
@@ -128,7 +140,7 @@ public class PacStudentController : MonoBehaviour
         return null;
     }
 
-    private bool ComputeInput(KeyCode input)
+    private bool ComputeInput(KeyCode input, ref Vector3 newPos)
     {
         if (!tweener.TweenExists(transform))
         {
@@ -136,7 +148,6 @@ public class PacStudentController : MonoBehaviour
             animator.SetBool("walkDown", false);
             animator.SetBool("walkRight", false);
             animator.SetBool("walkLeft", false);
-            Vector3 newPos;
 
             switch (input)
             {
@@ -207,6 +218,16 @@ public class PacStudentController : MonoBehaviour
 
     private void PlayParticles()
     {
-        particleSys.Play();
+        pacPS.Play();
+    }
+
+    private void PlayWallBump(Vector3 pos)
+    {
+        audioSource.Stop();
+        audioSource.clip = pacWallClip;
+        audioSource.Play();
+        bumpPS.transform.position = pos;
+        bumpPS.Play();
+        hasBumped = true;
     }
 }
