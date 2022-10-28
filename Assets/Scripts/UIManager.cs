@@ -6,10 +6,13 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
 
+    private MusicManager musicManager;
+
     void Start()
     {
         DontDestroyOnLoad(this);
         SceneManager.sceneLoaded += OnSceneLoaded;
+        musicManager = this.GetComponent<MusicManager>();
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMoad)
@@ -26,6 +29,7 @@ public class UIManager : MonoBehaviour
     public void LoadLevel1()
     {
         StartCoroutine(LoadAsyncScene(1));
+        musicManager.PlayGame();
     }
 
     public void LoadLevel2()

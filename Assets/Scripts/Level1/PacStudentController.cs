@@ -13,13 +13,18 @@ public class PacStudentController : MonoBehaviour
     [SerializeField] ParticleSystem bumpPS;
 
     private GameObject[] tiles;
-    private GameObject[] collectibles;
+    private List<GameObject> collectibles;
     private Tweener tweener;
     private AudioSource audioSource;
     private Animator animator;
     private KeyCode lastInput;
     private KeyCode currentInput;
     private bool hasBumped = false;
+    private int pointsForPellet = 10;
+    private int pointsForCherry = 100;
+
+    private GameObject managers;
+    private GameManager gameManager;
    
 
     // Start is called before the first frame update
@@ -27,7 +32,12 @@ public class PacStudentController : MonoBehaviour
     {
         tweener = GetComponent<Tweener>();
         animator = GetComponent<Animator>();
+        animator.SetBool("normalState", true);
         audioSource = GetComponent<AudioSource>();
+
+        managers = GameObject.Find("Managers");
+        gameManager = managers.GetComponent<GameManager>();
+        gameManager.Init();
     }
 
     // Update is called once per frame
@@ -88,14 +98,6 @@ public class PacStudentController : MonoBehaviour
         }
     }
 
-    private void PlayWallClip()
-    {
-        if (!audioSource.isPlaying)
-        {
-            audioSource.clip = pacWallClip;
-            audioSource.Play();
-        }
-    }
 
     private void PlayCollectClip()
     {
@@ -122,9 +124,10 @@ public class PacStudentController : MonoBehaviour
 
     private GameObject GetCollectible()
     { 
-        collectibles = GameObject.FindGameObjectsWithTag("Collectible");
+        collectibles = new List<GameObject>(GameObject.FindGameObjectsWithTag("Collectible"));
+        collectibles.AddRange(new List<GameObject>(GameObject.FindGameObjectsWithTag("Pellet")));
 
-        for (int i = 0; i < collectibles.Length; i++)
+        for (int i = 0; i < collectibles.Count; i++)
         {
             GameObject obj = collectibles[i];
             if(obj != null)
@@ -211,8 +214,7 @@ public class PacStudentController : MonoBehaviour
         GameObject item = GetCollectible();
         if (item != null)
         {
-            item.SetActive(false);
-            PlayCollectClip();
+            CollectItem(item);
         }
     }
 
@@ -229,5 +231,54 @@ public class PacStudentController : MonoBehaviour
         bumpPS.transform.position = pos;
         bumpPS.Play();
         hasBumped = true;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        GameObject collider = collision.gameObject;
+        if (collider.CompareTag("BonusCherry"))
+        {
+            CollectItem(collider);
+        }
+    }
+
+    private void CollectItem(GameObject item)
+    {
+        item.SetActive(false);
+        int points = 0;
+        if (item.CompareTag("BonusCherry"))
+        {
+            points = pointsForCherry;
+        }
+        else if (item.CompareTag("Pellet"))
+        {
+            points = pointsForPellet;
+        }
+        else if (item.CompareTag("Collectible"))
+        {
+            gameManager.SetScaredState();
+            ResetAnimatorStates();
+            animator.SetBool("powerState", true);
+            Timer timer = managers.GetComponent<Timer>();
+            timer.StartTimer(10);
+            Actions.OnTimerFinish += SetNormalState;
+        }
+
+        gameManager.AddPoints(points);
+        PlayCollectClip();
+    }
+
+    private void ResetAnimatorStates()
+    {
+        animator.SetBool("powerState", false);
+        animator.SetBool("normalState", false);
+        animator.SetBool("deathState", false);
+    }
+
+    private void SetNormalState()
+    {
+        ResetAnimatorStates();
+        animator.SetBool("normalState", true);
+        Actions.OnTimerFinish -= SetNormalState;
     }
 }
