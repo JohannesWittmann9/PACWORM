@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     private MusicManager musicManager;
 
     private int score = 0;
+    private int lives = 3;
     public int Score
     {
         get { return score; }
@@ -83,6 +84,25 @@ public class GameManager : MonoBehaviour
         if(scaredTimerVal == 3)
         {
             SetTransitionState();
+        }
+    }
+
+    public void DecreaseLiveCount()
+    {
+        lives -= 1;
+        switch (lives)
+        {
+            case 2:
+                GameObject.Find("Live3").SetActive(false);
+                break;
+            case 1:
+                GameObject.Find("Live2").SetActive(false);
+                break;
+            case 0:
+                GameObject.Find("Live1").SetActive(false);
+                break;
+            default:
+                break;
         }
     }
 }

@@ -22,6 +22,8 @@ public class PacStudentController : MonoBehaviour
     private bool hasBumped = false;
     private int pointsForPellet = 10;
     private int pointsForCherry = 100;
+    private bool acceptsInput;
+    private Vector3 startPosition;
 
     private GameObject managers;
     private GameManager gameManager;
@@ -38,49 +40,56 @@ public class PacStudentController : MonoBehaviour
         managers = GameObject.Find("Managers");
         gameManager = managers.GetComponent<GameManager>();
         gameManager.Init();
+
+        startPosition = transform.position;
+
+        acceptsInput = true;
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        if (Input.GetKey(KeyCode.W))
+        if (acceptsInput)
         {
-            lastInput = KeyCode.W;
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            lastInput = KeyCode.A;
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            lastInput = KeyCode.S;
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            lastInput = KeyCode.D;
-        }
-
-        if (tweener.TweenExists(transform))
-        {
-            PlayMovementClip();
-        }
-
-        if(lastInput != KeyCode.None)
-        {
-            Vector3 newPos = Vector3.zero;
-            bool canWalk = ComputeInput(lastInput, ref newPos);
-            if (!canWalk)
+            if (Input.GetKey(KeyCode.W))
             {
-                canWalk = ComputeInput(currentInput, ref newPos);
-                Vector3 pos = newPos + ((this.transform.position - newPos) / 2);
-                if(!canWalk && !hasBumped)PlayWallBump(pos);
+                lastInput = KeyCode.W;
             }
-            else
+            if (Input.GetKey(KeyCode.A))
             {
-                hasBumped = false;
+                lastInput = KeyCode.A;
+            }
+            if (Input.GetKey(KeyCode.S))
+            {
+                lastInput = KeyCode.S;
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                lastInput = KeyCode.D;
+            }
+
+            if (tweener.TweenExists(transform))
+            {
+                PlayMovementClip();
+            }
+
+            if (lastInput != KeyCode.None)
+            {
+                Vector3 newPos = Vector3.zero;
+                bool canWalk = ComputeInput(lastInput, ref newPos);
+                if (!canWalk)
+                {
+                    canWalk = ComputeInput(currentInput, ref newPos);
+                    Vector3 pos = newPos + ((this.transform.position - newPos) / 2);
+                    if (!canWalk && !hasBumped) PlayWallBump(pos);
+                }
+                else
+                {
+                    hasBumped = false;
+                }
             }
         }
+        
         
     }
 
@@ -240,6 +249,24 @@ public class PacStudentController : MonoBehaviour
         {
             CollectItem(collider);
         }
+        if (collider.CompareTag("Ghost"))
+        {
+            bool normalState = animator.GetBool("normalState");
+            bool powerState = animator.GetBool("powerState");
+            if (normalState)
+            {
+                //ResetAnimatorStates();
+                //animator.SetBool("deathState", true);
+                //acceptsInput = false;
+                gameManager.DecreaseLiveCount();
+                transform.position = Vector3.zero;
+            }
+            else if (powerState)
+            {
+
+            }
+        }
+
     }
 
     private void CollectItem(GameObject item)
