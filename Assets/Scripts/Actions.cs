@@ -6,4 +6,6 @@ public static class Actions
     public static Action<GameObject> OnTimerChange;
 
     public static Action<GameObject> OnTimerFinish;
+
+    public static Action<GameObject> BackInStartZone;
 }

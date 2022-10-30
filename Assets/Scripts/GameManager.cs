@@ -6,7 +6,7 @@ using System;
 
 public class GameManager : MonoBehaviour
 {
-    private GhostController ghostController;
+    private GhostManager ghostController;
     private PacStudentController studentController;
     private CherryController cherryContoller;
     private Timer timer;
@@ -47,7 +47,7 @@ public class GameManager : MonoBehaviour
         gameStarted = false;
         title = GameObject.Find("Score").GetComponent<TMPro.TextMeshProUGUI>();
         scaredTimer = GameObject.Find("GhostScaredTimer").GetComponent<TMPro.TextMeshProUGUI>();
-        ghostController = GameObject.Find("Ghosts").GetComponent<GhostController>();
+        ghostController = GameObject.Find("Ghosts").GetComponent<GhostManager>();
         studentController = GameObject.Find("PacStudent").GetComponent<PacStudentController>();
         musicManager = GameObject.Find("BackgroundMusic").GetComponent<MusicManager>();
         timer = GetComponent<Timer>();
@@ -106,6 +106,8 @@ public class GameManager : MonoBehaviour
         musicManager.PlayGame();
 
         gameStarted = true;
+
+        ghostController.SetStateController(true);
     }
 
     private void CheckGameOver()
@@ -201,6 +203,12 @@ public class GameManager : MonoBehaviour
         ghostDead = true;
     }
 
+    public void ResetDeadState()
+    {
+        ghostDead = false;
+        if (!ghostsScared) musicManager.PlayGame();
+    }
+
     private void TimerFinished(GameObject obj)
     {
         if(obj.Equals(gameObject))
@@ -212,12 +220,8 @@ public class GameManager : MonoBehaviour
             Actions.OnTimerFinish -= TimerFinished;
             SetNormalState();
             ghostsScared = false;
-        }
-        else
-        {
-            ghostDead = false;
-            if(!ghostsScared) musicManager.PlayGame();
-        }
+        }  
+        
     }
 
     private void IncrementTimer(GameObject obj)
