@@ -9,6 +9,7 @@ public class MusicManager : MonoBehaviour
     [SerializeField] AudioClip intro;
     [SerializeField] AudioClip gameNormal;
     [SerializeField] AudioClip ghostsScared;
+    [SerializeField] AudioClip ghostDead;
 
     // Start is called before the first frame update
     void Start()
@@ -39,6 +40,12 @@ public class MusicManager : MonoBehaviour
     public void PlayScared()
     {
         source.clip = ghostsScared;
+        source.Play();
+    }
+
+    public void PlayGhostDead()
+    {
+        source.clip = ghostDead;
         source.Play();
     }
 }

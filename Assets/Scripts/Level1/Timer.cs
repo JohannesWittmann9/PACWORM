@@ -19,11 +19,11 @@ public class Timer : MonoBehaviour
             {
                 timer -= 1;
                 secondCounter -= 1.0f;
-                Actions.OnTimerChange();
+                if(gameObject.name == "Managers") Actions.OnTimerChange(gameObject);
             }
             if(timer == 0)
             {
-                Actions.OnTimerFinish();
+                Actions.OnTimerFinish(gameObject);
                 timerStarted = false;
             }
         }

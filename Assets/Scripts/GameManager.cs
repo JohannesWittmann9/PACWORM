@@ -16,6 +16,8 @@ public class GameManager : MonoBehaviour
 
     private int score = 0;
     private int lives = 3;
+    private bool ghostDead = false;
+    private bool ghostsScared = false;
     public int Score
     {
         get { return score; }
@@ -55,6 +57,7 @@ public class GameManager : MonoBehaviour
         scaredTimer.enabled = true;
         Actions.OnTimerChange += IncrementTimer;
         Actions.OnTimerFinish += TimerFinished;
+        ghostsScared = true;
     }
 
     public void SetTransitionState()
@@ -65,26 +68,47 @@ public class GameManager : MonoBehaviour
     public void SetNormalState()
     {
         ghostController.SetNormal();
-        musicManager.PlayGame();
+        if(!ghostDead) musicManager.PlayGame();
     }
 
-    private void TimerFinished()
+    public void SetDeadState(GameObject bird)
     {
-        scaredTimer.text = "Scared: 10";
-        scaredTimer.enabled = false;
-        Actions.OnTimerChange -= IncrementTimer;
-        Actions.OnTimerFinish -= TimerFinished;
-        SetNormalState();
+        musicManager.PlayGhostDead();
+        ghostController.SetDead(bird);
+        ghostDead = true;
     }
 
-    private void IncrementTimer()
+    private void TimerFinished(GameObject obj)
     {
-        scaredTimerVal -= 1;
-        scaredTimer.text = "Scared: " + scaredTimerVal;
-        if(scaredTimerVal == 3)
+        if(obj.Equals(gameObject))
         {
-            SetTransitionState();
+            scaredTimer.text = "Scared: 10";
+            scaredTimer.enabled = false;
+            scaredTimerVal = 10;
+            Actions.OnTimerChange -= IncrementTimer;
+            Actions.OnTimerFinish -= TimerFinished;
+            SetNormalState();
+            ghostsScared = false;
         }
+        else
+        {
+            ghostDead = false;
+            if(!ghostsScared) musicManager.PlayGame();
+        }
+    }
+
+    private void IncrementTimer(GameObject obj)
+    {
+        if (obj.Equals(gameObject))
+        {
+            scaredTimerVal -= 1;
+            scaredTimer.text = "Scared: " + scaredTimerVal;
+            if (scaredTimerVal <= 3)
+            {
+                SetTransitionState();
+            }
+        }
+        
     }
 
     public void DecreaseLiveCount()

@@ -10,6 +10,7 @@ public class PacStudentController : MonoBehaviour
     [SerializeField] AudioClip pacEatClip;
     [SerializeField] AudioClip pacWallClip;
     [SerializeField] ParticleSystem pacPS;
+    [SerializeField] ParticleSystem deathPS;
     [SerializeField] ParticleSystem bumpPS;
 
     private GameObject[] tiles;
@@ -22,6 +23,7 @@ public class PacStudentController : MonoBehaviour
     private bool hasBumped = false;
     private int pointsForPellet = 10;
     private int pointsForCherry = 100;
+    private int pointsForGhost = 300;
     private bool acceptsInput;
     private Vector3 startPosition;
 
@@ -88,6 +90,7 @@ public class PacStudentController : MonoBehaviour
                     hasBumped = false;
                 }
             }
+
         }
         
         
@@ -97,6 +100,7 @@ public class PacStudentController : MonoBehaviour
     {
         TryCollectItem();
     }
+
 
     private void PlayMovementClip()
     {
@@ -178,6 +182,8 @@ public class PacStudentController : MonoBehaviour
                     newPos = new Vector3(transform.position.x - 1, transform.position.y);
                     if (IsWalkable(newPos))
                     {
+                        ComputeTeleporters(ref newPos);
+
                         currentInput = input;
                         tweener.AddTween(transform, transform.position, newPos, moveDuration);
                         animator.SetBool("walkLeft", true);
@@ -201,6 +207,8 @@ public class PacStudentController : MonoBehaviour
                     newPos = new Vector3(transform.position.x + 1, transform.position.y);
                     if (IsWalkable(newPos))
                     {
+                        ComputeTeleporters(ref newPos);
+                        
                         currentInput = input;
                         tweener.AddTween(transform, transform.position, newPos, moveDuration);
                         animator.SetBool("walkRight", true);
@@ -259,11 +267,15 @@ public class PacStudentController : MonoBehaviour
                 //animator.SetBool("deathState", true);
                 //acceptsInput = false;
                 gameManager.DecreaseLiveCount();
-                transform.position = Vector3.zero;
+                tweener.StopTween(transform);
+                deathPS.transform.position = transform.position;
+                transform.position = startPosition;
+                deathPS.Play();
+                gameManager.AddPoints(pointsForGhost);
             }
             else if (powerState)
             {
-
+                gameManager.SetDeadState(collider);
             }
         }
 
@@ -302,10 +314,30 @@ public class PacStudentController : MonoBehaviour
         animator.SetBool("deathState", false);
     }
 
-    private void SetNormalState()
+    private void SetNormalState(GameObject obj)
     {
         ResetAnimatorStates();
         animator.SetBool("normalState", true);
         Actions.OnTimerFinish -= SetNormalState;
+    }
+
+    private void ComputeTeleporters(ref Vector3 newPos)
+    {
+        Vector3 edge = GameObject.Find("LevelMap").GetComponent<LevelGenerator>().topLeft;
+        float size = 28.0f;
+        float xLeft = edge.x;
+        float xRight = edge.x + size;
+
+        if (newPos.x < xLeft)
+        {
+            newPos = new Vector3(xRight - 1, newPos.y, 0);
+            transform.position = new Vector3(xRight, transform.position.y, 0);
+        }
+        else if (newPos.x > xRight)
+        {
+            newPos = new Vector3(xLeft + 1, newPos.y, 0);
+            transform.position = new Vector3(xLeft, transform.position.y, 0);
+        }
+
     }
 }
