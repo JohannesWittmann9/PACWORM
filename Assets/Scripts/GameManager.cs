@@ -117,6 +117,23 @@ public class GameManager : MonoBehaviour
             {
                 PlayerPrefs.SetInt("score", score);
                 PlayerPrefs.SetString("time", gameTimer.text.Substring(6));
+            } else if(score == PlayerPrefs.GetInt("score"))
+            {
+                string currentTime = gameTimer.text.Substring(6);
+                string prevTime = PlayerPrefs.GetString("time");
+                int preMinutes = Convert.ToInt32(prevTime.Substring(0, 2));
+                int preSeconds = Convert.ToInt32(prevTime.Substring(3, 2));
+                int preMillies = Convert.ToInt32(prevTime.Substring(6, 2));
+
+                int curMinutes = Convert.ToInt32(currentTime.Substring(0, 2));
+                int curSeconds = Convert.ToInt32(currentTime.Substring(3, 2));
+                int curMillies = Convert.ToInt32(currentTime.Substring(6, 2));
+
+                if((preMinutes > curMinutes) || (preMinutes == curMinutes && preSeconds > curSeconds) ||
+                    (preMinutes == curMinutes && preSeconds == curSeconds && preMillies > curMillies))
+                {
+                    PlayerPrefs.SetString("time", currentTime);
+                }
             }
 
             gameStarted = false;
