@@ -8,6 +8,11 @@ public class Timer : MonoBehaviour
     private float secondCounter = 0;
     private int timer = 0;
 
+    public bool TimerStarted
+    {
+        get { return timerStarted; }
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -24,12 +29,8 @@ public class Timer : MonoBehaviour
             if(timer == 0)
             {
                 Actions.OnTimerFinish(gameObject);
-                timerStarted = false;
+                StopTimer();
             }
-        }
-        else
-        {
-            secondCounter = 0;
         }
     }
 
@@ -38,5 +39,11 @@ public class Timer : MonoBehaviour
         timer = seconds;
         secondCounter = 0;
         timerStarted = true;
+    }
+
+    public void StopTimer()
+    {
+        timerStarted = false;
+        secondCounter = 0;
     }
 }

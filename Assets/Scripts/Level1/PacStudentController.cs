@@ -9,6 +9,7 @@ public class PacStudentController : MonoBehaviour
     [SerializeField] AudioClip pacMovementClip;
     [SerializeField] AudioClip pacEatClip;
     [SerializeField] AudioClip pacWallClip;
+    [SerializeField] AudioClip pacDeadClip;
     [SerializeField] ParticleSystem pacPS;
     [SerializeField] ParticleSystem deathPS;
     [SerializeField] ParticleSystem bumpPS;
@@ -24,7 +25,6 @@ public class PacStudentController : MonoBehaviour
     private int pointsForPellet = 10;
     private int pointsForCherry = 100;
     private int pointsForGhost = 300;
-    private bool acceptsInput;
     private Vector3 startPosition;
 
     private GameObject managers;
@@ -41,60 +41,54 @@ public class PacStudentController : MonoBehaviour
 
         managers = GameObject.Find("Managers");
         gameManager = managers.GetComponent<GameManager>();
-        gameManager.Init();
 
         startPosition = transform.position;
-
-        acceptsInput = true;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (acceptsInput)
+        if (Input.GetKey(KeyCode.W))
         {
-            if (Input.GetKey(KeyCode.W))
-            {
-                lastInput = KeyCode.W;
-            }
-            if (Input.GetKey(KeyCode.A))
-            {
-                lastInput = KeyCode.A;
-            }
-            if (Input.GetKey(KeyCode.S))
-            {
-                lastInput = KeyCode.S;
-            }
-            if (Input.GetKey(KeyCode.D))
-            {
-                lastInput = KeyCode.D;
-            }
-
-            if (tweener.TweenExists(transform))
-            {
-                PlayMovementClip();
-            }
-
-            if (lastInput != KeyCode.None)
-            {
-                Vector3 newPos = Vector3.zero;
-                bool canWalk = ComputeInput(lastInput, ref newPos);
-                if (!canWalk)
-                {
-                    canWalk = ComputeInput(currentInput, ref newPos);
-                    Vector3 pos = newPos + ((this.transform.position - newPos) / 2);
-                    if (!canWalk && !hasBumped) PlayWallBump(pos);
-                }
-                else
-                {
-                    hasBumped = false;
-                }
-            }
-
+            lastInput = KeyCode.W;
         }
-        
-        
+        if (Input.GetKey(KeyCode.A))
+        {
+            lastInput = KeyCode.A;
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            lastInput = KeyCode.S;
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            lastInput = KeyCode.D;
+        }
+
+        if (tweener.TweenExists(transform))
+        {
+            PlayMovementClip();
+        }
+
+        if (lastInput != KeyCode.None)
+        {
+            Vector3 newPos = Vector3.zero;
+            bool canWalk = ComputeInput(lastInput, ref newPos);
+            if (!canWalk)
+            {
+                canWalk = ComputeInput(currentInput, ref newPos);
+                Vector3 pos = newPos + ((this.transform.position - newPos) / 2);
+                if (!canWalk && !hasBumped) PlayWallBump(pos);
+            }
+            else
+            {
+                hasBumped = false;
+            }
+        }
+
+
     }
+
 
     private void FixedUpdate()
     {
@@ -263,19 +257,21 @@ public class PacStudentController : MonoBehaviour
             bool powerState = animator.GetBool("powerState");
             if (normalState)
             {
-                //ResetAnimatorStates();
-                //animator.SetBool("deathState", true);
-                //acceptsInput = false;
-                gameManager.DecreaseLiveCount();
+                bool gameOver = gameManager.DecreaseLiveCount();
                 tweener.StopTween(transform);
                 deathPS.transform.position = transform.position;
-                transform.position = startPosition;
                 deathPS.Play();
-                gameManager.AddPoints(pointsForGhost);
+                if (!gameOver)
+                {
+                    transform.position = startPosition;
+                    ResetInput();
+                }
+                
             }
             else if (powerState)
             {
                 gameManager.SetDeadState(collider);
+                gameManager.AddPoints(pointsForGhost);
             }
         }
 
@@ -300,7 +296,6 @@ public class PacStudentController : MonoBehaviour
             animator.SetBool("powerState", true);
             Timer timer = managers.GetComponent<Timer>();
             timer.StartTimer(10);
-            Actions.OnTimerFinish += SetNormalState;
         }
 
         gameManager.AddPoints(points);
@@ -314,11 +309,29 @@ public class PacStudentController : MonoBehaviour
         animator.SetBool("deathState", false);
     }
 
-    private void SetNormalState(GameObject obj)
+    private void ResetInput()
+    {
+        animator.SetBool("walkLeft", false);
+        animator.SetBool("walkRight", false);
+        animator.SetBool("walkUp", false);
+        animator.SetBool("walkDown", false);
+        currentInput = KeyCode.None;
+        lastInput = KeyCode.None;
+        pacPS.Stop();
+    }
+
+    public void SetDeadState()
+    {
+        ResetAnimatorStates();
+        animator.SetBool("deathState", true);
+        audioSource.clip = pacDeadClip;
+        audioSource.Play();
+    }
+
+    public void SetNormalState()
     {
         ResetAnimatorStates();
         animator.SetBool("normalState", true);
-        Actions.OnTimerFinish -= SetNormalState;
     }
 
     private void ComputeTeleporters(ref Vector3 newPos)

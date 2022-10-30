@@ -12,19 +12,27 @@ public class CherryController : MonoBehaviour
 
     private GameObject cherry;
 
-
     // Start is called before the first frame update
     void Start()
     {
         cherry = GameObject.Find("BonusCherry");
         cherry.SetActive(false);
-        InvokeRepeating("SpawnCherry", 0, spawnRateInSeconds);
     }
 
     // Update is called once per frame
     void Update()
     {
         if (!tweener.TweenExists(cherry.transform)) cherry.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        InvokeRepeating("SpawnCherry", 0, spawnRateInSeconds);
+    }
+
+    private void OnDisable()
+    {
+        CancelInvoke();
     }
 
     private void SpawnCherry()

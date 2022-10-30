@@ -5,17 +5,32 @@ using UnityEngine;
 public class MusicManager : MonoBehaviour
 {
 
-    [SerializeField] AudioSource source;
+    private AudioSource source;
     [SerializeField] AudioClip intro;
     [SerializeField] AudioClip gameNormal;
     [SerializeField] AudioClip ghostsScared;
     [SerializeField] AudioClip ghostDead;
 
+    private static GameObject player;
+    
     // Start is called before the first frame update
     void Start()
     {
-        GameObject audio = GameObject.Find("BackgroundMusic");
-        DontDestroyOnLoad(audio);
+        
+        DontDestroyOnLoad(gameObject);
+
+        if (player == null)
+        {
+            player = gameObject;
+        }
+
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        source = GetComponent<AudioSource>();
         PlayIntro();
     }
 
@@ -23,6 +38,11 @@ public class MusicManager : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void Stop()
+    {
+        source.Stop();
     }
 
     public void PlayIntro()

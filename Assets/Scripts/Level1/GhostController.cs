@@ -83,8 +83,12 @@ public class GhostController : MonoBehaviour
             ResetStates(anim);
             if (ghostsScared) anim.SetBool("scaredState", true);
             else anim.SetBool("normalState", true);
-            Actions.OnTimerFinish -= SetNormal;
-            if(!ghostsScared) managers.GetComponent<MusicManager>().PlayGame();
+            int deadGhosts = CountDeadBirds();
+            if(deadGhosts == 0) Actions.OnTimerFinish -= SetNormal;
+            MusicManager mm = managers.GetComponent<MusicManager>();
+            if (!ghostsScared) mm.PlayGame();
+            else if(deadGhosts == 0) mm.PlayScared();
+            GhostEnabled(bird, true);
         }
         
     }
@@ -94,9 +98,11 @@ public class GhostController : MonoBehaviour
         Animator anim = bird.GetComponent<Animator>();
         ResetStates(anim);
         anim.SetBool("deadState", true);
+        int deadGhosts = CountDeadBirds();
         Timer deadTimer = bird.GetComponent<Timer>();
         deadTimer.StartTimer(5);
-        Actions.OnTimerFinish += SetNormal;
+        if(deadGhosts == 1) Actions.OnTimerFinish += SetNormal;
+        GhostEnabled(bird, false);
     }
 
     private void ResetStates(Animator animator)
@@ -105,5 +111,20 @@ public class GhostController : MonoBehaviour
         animator.SetBool("transitionState", false);
         animator.SetBool("scaredState", false);
         animator.SetBool("deadState", false);
+    }
+
+    private void GhostEnabled(GameObject ghost, bool enabled)
+    {
+        ghost.GetComponent<BoxCollider2D>().enabled = enabled;   
+    }
+
+    private int CountDeadBirds()
+    {
+        int counter = 0;
+        foreach(Animator anim in ghostAnimators)
+        {
+            if (anim.GetBool("deadState")) counter += 1;
+        }
+        return counter;
     }
 }
