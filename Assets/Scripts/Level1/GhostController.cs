@@ -1,130 +1,406 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class GhostController : MonoBehaviour
 {
-    [SerializeField] GameObject blueBird;
-    [SerializeField] GameObject redBird;
-    [SerializeField] GameObject yellowBird;
-    [SerializeField] GameObject greenBird;
+    [SerializeField] float moveDuration;
     [SerializeField] Tweener tweener;
+    [SerializeField] int behaviour;
+    [SerializeField] float durationToStartPos;
 
-    private List<Animator> ghostAnimators;
-    private GameObject managers;
-    private bool ghostsScared = false;
+    private GameObject target;
+
+    private Animator ghostAnimator;
+
+    private Vector3 startPos;
+
+    private List<Vector3> startPoints;
+    private List<Vector3> gatePoints;
+
+    private int normalBehaviour;
+
+    private GhostManager manager;
+    private GameManager gameManager;
+
+    public int NormalBehaviour
+    {
+        get { return normalBehaviour; }
+    }
+
+    public int Behaviour
+    {
+        set { behaviour = value; }
+    }
+    
+    
+    private Vector3 lastPosition;
+    private Vector3 currentPosition;
+
 
 
     // Start is called before the first frame update
     void Start()
     {
-        ghostAnimators = new List<Animator>();
-        ghostAnimators.Add(blueBird.GetComponent<Animator>());
-        ghostAnimators.Add(redBird.GetComponent<Animator>());
-        ghostAnimators.Add(yellowBird.GetComponent<Animator>());
-        ghostAnimators.Add(greenBird.GetComponent<Animator>());
+        startPos = transform.position;
+        normalBehaviour = behaviour;
+        ghostAnimator = GetComponent<Animator>();
+        lastPosition = transform.position;
+        currentPosition = transform.position;
+        target = GameObject.Find("PacStudent");
 
-        managers = GameObject.Find("Managers");
+        gatePoints = new List<Vector3>();
+        gatePoints.Add(new Vector3(9.5f, -5.5f, 0));
+        gatePoints.Add(new Vector3(10.5f, -5.5f, 0));
+        gatePoints.Add(new Vector3(9.5f, -10.5f, 0));
+        gatePoints.Add(new Vector3(10.5f, -10.5f, 0));
+
+        startPoints = new List<Vector3>();
+        startPoints.Add(new Vector3(9.5f, -4.5f, 0));
+        startPoints.Add(new Vector3(10.5f, -4.5f, 0));
+        startPoints.Add(new Vector3(9.5f, -11.5f, 0));
+        startPoints.Add(new Vector3(10.5f, -11.5f, 0));
+
+        manager = GameObject.Find("Ghosts").GetComponent<GhostManager>();
+        gameManager = GameObject.Find("Managers").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
     void Update()
-    {
-        
-    }
-
-    public void SetScared()
-    {
-        foreach(Animator an in ghostAnimators)
+    { 
+        if(transform.position == startPos)
         {
-            ResetStates(an);
-            an.SetBool("scaredState", true);
-            an.SetBool("walkLeft", true);
-            ghostsScared = true;
+            manager.SetNormal(gameObject);
+            currentPosition = startPos;
+            lastPosition = startPos;
+            gameManager.ResetDeadState();
+        }
+        if(!tweener.TweenExists(transform) && transform.position.y <= -5.5f && transform.position.y >= -10.5f && transform.position.x <= 12.5f
+            && transform.position.x >= 7.5f)
+        {
+            Vector3 t = GetStartingPoint();
+            MoveFromStartZone(t);
+        }
+        if(!tweener.TweenExists(transform))
+        {
+            Compute();
         }
 
     }
 
-    public void SetTransition()
+
+    private bool IsWalkable(Vector3 newPos)
     {
-        foreach (Animator an in ghostAnimators)
+        GameObject[] tiles = GameObject.FindGameObjectsWithTag("NonWalkable");
+        foreach (GameObject tile in tiles)
         {
-            bool deadState = an.GetBool("deadState");
-            if (!deadState)
+            float distance = Vector3.Distance(tile.transform.position, newPos);
+            if (distance < 0.5f)
             {
-                ResetStates(an);
-                an.SetBool("transitionState", true);
-                an.SetBool("walkLeft", true);
+                return false;
+
             }
         }
+        return true;
     }
 
-    public void SetNormal()
+
+
+    private void Compute()
     {
-        ghostsScared = false;
-        foreach (Animator an in ghostAnimators)
+        ResetAnimatorStates();
+        Vector3 tar = target.transform.position;
+        switch (behaviour)
         {
-            bool deadState = an.GetBool("deadState");
-            if (!deadState)
+            case 1:
+                Create1Behaviour(tar);
+                break;
+            case 2:
+                Create2Behaviour(tar);
+                break;
+            case 3:
+                Create3Behaviour();
+                break;
+            case 4:
+                Create4Behaviour();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void ResetAnimatorStates()
+    {
+        ghostAnimator.SetBool("walkUp", false);
+        ghostAnimator.SetBool("walkDown", false);
+        ghostAnimator.SetBool("walkRight", false);
+        ghostAnimator.SetBool("walkLeft", false);
+    }
+
+    private bool IsTeleporter(Vector3 newPos)
+    {
+        Vector3 edge = GameObject.Find("LevelMap").GetComponent<LevelGenerator>().topLeft;
+        float size = 28.0f;
+        float xLeft = edge.x;
+        float xRight = edge.x + size;
+
+        if (newPos.x <= xLeft)
+        {
+            return true;
+        }
+        else if (newPos.x >= xRight)
+        {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    public Vector3 GetStartingPoint()
+    {
+        Vector3 current = Vector3.zero;
+        foreach(Vector3 point in startPoints)
+        {
+            if (Vector3.Distance(transform.position, point) < Vector3.Distance(transform.position, current)) current = point; 
+        }
+
+        return current;
+    }
+
+    public bool isStartingPoint(Vector3 pos)
+    {
+        foreach(Vector3 point in gatePoints)
+        {
+            if (point == pos) return true;
+        }
+        return false;
+    }
+
+    public void MoveToStartPos()
+    {
+        tweener.StopTween(transform);
+        tweener.AddTween(transform, transform.position, startPos, durationToStartPos);
+    }
+
+    private void Create1Behaviour(Vector3 target)
+    {
+        Vector3 pacPos = target;
+
+        Vector3 leftTile = new Vector3(currentPosition.x - 1, currentPosition.y, 0);
+        Vector3 rightTile = new Vector3(currentPosition.x + 1, currentPosition.y, 0);
+        Vector3 upperTile = new Vector3(currentPosition.x, currentPosition.y + 1, 0);
+        Vector3 lowerTile = new Vector3(currentPosition.x, currentPosition.y - 1, 0);
+
+        List<Vector3> directions = new List<Vector3>() { leftTile, rightTile, upperTile, lowerTile };
+        List<Vector3> sortedDirections = new List<Vector3>();
+        foreach(Vector3 vec in directions)
+        {
+            if (vec == lastPosition) continue;
+
+            if (!IsWalkable(vec)) continue;
+
+            if (IsTeleporter(vec)) continue;
+
+            if (isStartingPoint(vec)) continue;
+
+            sortedDirections.Add(vec);
+        }
+
+        System.Random random = new System.Random();
+        sortedDirections = sortedDirections.OrderBy((vec) => random.Next()).ToList<Vector3>();
+
+        // If there is no suitable direction, we still have to keep moving
+        Vector3 direction = sortedDirections[0];
+        foreach(Vector3 vec in sortedDirections)
+        {
+            float newDistance = Vector3.Distance(pacPos, vec);
+            float oldDistance = Vector3.Distance(pacPos, currentPosition);
+            if(newDistance >= oldDistance)
             {
-                ResetStates(an);
-                an.SetBool("normalState", true);
-                an.SetBool("walkLeft", true);
+                direction = vec;
             }
         }
+
+        if(direction == leftTile) ghostAnimator.SetBool("walkLeft", true);
+        else if (direction == rightTile) ghostAnimator.SetBool("walkRight", true);
+        else if (direction == upperTile) ghostAnimator.SetBool("walkUp", true);
+        else if (direction == lowerTile) ghostAnimator.SetBool("walkDown", true);
+
+        lastPosition = currentPosition;
+        currentPosition = direction;
+        tweener.AddTween(transform, lastPosition, direction, moveDuration);
     }
 
-    public void SetNormal(GameObject bird)
+    private void Create2Behaviour(Vector3 target)
     {
-        Animator anim = bird.GetComponent<Animator>();
-        //Check if its a bird
-        if(anim != null)
+        Vector3 pacPos = target;
+
+        Vector3 leftTile = new Vector3(currentPosition.x - 1, currentPosition.y, 0);
+        Vector3 rightTile = new Vector3(currentPosition.x + 1, currentPosition.y, 0);
+        Vector3 upperTile = new Vector3(currentPosition.x, currentPosition.y + 1, 0);
+        Vector3 lowerTile = new Vector3(currentPosition.x, currentPosition.y - 1, 0);
+
+        List<Vector3> directions = new List<Vector3>() { leftTile, rightTile, upperTile, lowerTile };
+        List<Vector3> sortedDirections = new List<Vector3>();
+        foreach (Vector3 vec in directions)
         {
-            ResetStates(anim);
-            if (ghostsScared) anim.SetBool("scaredState", true);
-            else anim.SetBool("normalState", true);
-            int deadGhosts = CountDeadBirds();
-            if(deadGhosts == 0) Actions.OnTimerFinish -= SetNormal;
-            MusicManager mm = managers.GetComponent<MusicManager>();
-            if (!ghostsScared) mm.PlayGame();
-            else if(deadGhosts == 0) mm.PlayScared();
-            GhostEnabled(bird, true);
+            if (vec == lastPosition) continue;
+
+            if (!IsWalkable(vec)) continue;
+
+            if (IsTeleporter(vec)) continue;
+
+            if (isStartingPoint(vec)) continue;
+
+            sortedDirections.Add(vec);
         }
+
+        System.Random random = new System.Random();
+        sortedDirections = sortedDirections.OrderBy((vec) => random.Next()).ToList<Vector3>();
+
+        // If there is no suitable direction, we still have to keep moving
+        Vector3 direction = sortedDirections[0];
+        foreach (Vector3 vec in sortedDirections)
+        {
+            float newDistance = Vector3.Distance(pacPos, vec);
+            float oldDistance = Vector3.Distance(pacPos, currentPosition);
+            if (newDistance <= oldDistance)
+            {
+                direction = vec;
+            }
+        }
+
+        if (direction == leftTile) ghostAnimator.SetBool("walkLeft", true);
+        else if (direction == rightTile) ghostAnimator.SetBool("walkRight", true);
+        else if (direction == upperTile) ghostAnimator.SetBool("walkUp", true);
+        else if (direction == lowerTile) ghostAnimator.SetBool("walkDown", true);
+
+        lastPosition = currentPosition;
+        currentPosition = direction;
+        tweener.AddTween(transform, lastPosition, direction, moveDuration);
+    }
+
+    private void Create3Behaviour()
+    {
+        Vector3 leftTile = new Vector3(currentPosition.x - 1, currentPosition.y, 0);
+        Vector3 rightTile = new Vector3(currentPosition.x + 1, currentPosition.y, 0);
+        Vector3 upperTile = new Vector3(currentPosition.x, currentPosition.y + 1, 0);
+        Vector3 lowerTile = new Vector3(currentPosition.x, currentPosition.y - 1, 0);
+
+        List<Vector3> directions = new List<Vector3>() { leftTile, rightTile, upperTile, lowerTile };
+        List<Vector3> sortedDirections = new List<Vector3>();
+        foreach (Vector3 vec in directions)
+        {
+            if (vec == lastPosition) continue;
+
+            if (!IsWalkable(vec)) continue;
+
+            if (IsTeleporter(vec)) continue;
+
+            if (isStartingPoint(vec)) continue;
+
+            sortedDirections.Add(vec);
+        }
+
+        System.Random random = new System.Random();
+        sortedDirections = sortedDirections.OrderBy((vec) => random.Next()).ToList<Vector3>();
+
+        // If there is no suitable direction, we still have to keep moving
+        Vector3 direction = sortedDirections[0];
         
+
+        if (direction == leftTile) ghostAnimator.SetBool("walkLeft", true);
+        else if (direction == rightTile) ghostAnimator.SetBool("walkRight", true);
+        else if (direction == upperTile) ghostAnimator.SetBool("walkUp", true);
+        else if (direction == lowerTile) ghostAnimator.SetBool("walkDown", true);
+
+        lastPosition = currentPosition;
+        currentPosition = direction;
+        tweener.AddTween(transform, lastPosition, direction, moveDuration);
     }
 
-    public void SetDead(GameObject bird)
+    private void Create4Behaviour()
     {
-        Animator anim = bird.GetComponent<Animator>();
-        ResetStates(anim);
-        anim.SetBool("deadState", true);
-        int deadGhosts = CountDeadBirds();
-        Timer deadTimer = bird.GetComponent<Timer>();
-        deadTimer.StartTimer(5);
-        if(deadGhosts == 1) Actions.OnTimerFinish += SetNormal;
-        GhostEnabled(bird, false);
-    }
+        Vector3 leftTile = new Vector3(currentPosition.x - 1, currentPosition.y, 0);
+        Vector3 rightTile = new Vector3(currentPosition.x + 1, currentPosition.y, 0);
+        Vector3 upperTile = new Vector3(currentPosition.x, currentPosition.y + 1, 0);
+        Vector3 lowerTile = new Vector3(currentPosition.x, currentPosition.y - 1, 0);
 
-    private void ResetStates(Animator animator)
-    {
-        animator.SetBool("normalState", false);
-        animator.SetBool("transitionState", false);
-        animator.SetBool("scaredState", false);
-        animator.SetBool("deadState", false);
-    }
-
-    private void GhostEnabled(GameObject ghost, bool enabled)
-    {
-        ghost.GetComponent<BoxCollider2D>().enabled = enabled;   
-    }
-
-    private int CountDeadBirds()
-    {
-        int counter = 0;
-        foreach(Animator anim in ghostAnimators)
+        List<Vector3> directions = new List<Vector3>() { leftTile, rightTile, upperTile, lowerTile };
+        List<Vector3> sortedDirections = new List<Vector3>();
+        foreach (Vector3 vec in directions)
         {
-            if (anim.GetBool("deadState")) counter += 1;
+            if (vec == lastPosition) continue;
+
+            if (!IsWalkable(vec)) continue;
+
+            if (IsTeleporter(vec)) continue;
+
+            if (isStartingPoint(vec)) continue;
+
+            sortedDirections.Add(vec);
         }
-        return counter;
+
+        System.Random random = new System.Random();
+        sortedDirections = sortedDirections.OrderBy((vec) => random.Next()).ToList<Vector3>();
+
+        // If there is no suitable direction, we still have to keep moving
+        Vector3 direction = sortedDirections[0];
+
+        if (direction == leftTile) ghostAnimator.SetBool("walkLeft", true);
+        else if (direction == rightTile) ghostAnimator.SetBool("walkRight", true);
+        else if (direction == upperTile) ghostAnimator.SetBool("walkUp", true);
+        else if (direction == lowerTile) ghostAnimator.SetBool("walkDown", true);
+
+        lastPosition = currentPosition;
+        currentPosition = direction;
+        tweener.AddTween(transform, lastPosition, direction, moveDuration);
+    }
+
+    private void MoveFromStartZone(Vector3 target)
+    {
+        Vector3 pacPos = target;
+
+        Vector3 leftTile = new Vector3(currentPosition.x - 1, currentPosition.y, 0);
+        Vector3 rightTile = new Vector3(currentPosition.x + 1, currentPosition.y, 0);
+        Vector3 upperTile = new Vector3(currentPosition.x, currentPosition.y + 1, 0);
+        Vector3 lowerTile = new Vector3(currentPosition.x, currentPosition.y - 1, 0);
+
+        List<Vector3> directions = new List<Vector3>() { leftTile, rightTile, upperTile, lowerTile };
+        List<Vector3> sortedDirections = new List<Vector3>();
+        foreach (Vector3 vec in directions)
+        {
+            if (vec == lastPosition) continue;
+
+            if (!IsWalkable(vec)) continue;
+
+            sortedDirections.Add(vec);
+        }
+
+        System.Random random = new System.Random();
+        sortedDirections = sortedDirections.OrderBy((vec) => random.Next()).ToList<Vector3>();
+
+        // If there is no suitable direction, we still have to keep moving
+        Vector3 direction = sortedDirections[0];
+        foreach (Vector3 vec in sortedDirections)
+        {
+            float newDistance = Vector3.Distance(pacPos, vec);
+            float oldDistance = Vector3.Distance(pacPos, currentPosition);
+            if (newDistance < oldDistance)
+            {
+                direction = vec;
+            }
+        }
+
+        if (direction == leftTile) ghostAnimator.SetBool("walkLeft", true);
+        else if (direction == rightTile) ghostAnimator.SetBool("walkRight", true);
+        else if (direction == upperTile) ghostAnimator.SetBool("walkUp", true);
+        else if (direction == lowerTile) ghostAnimator.SetBool("walkDown", true);
+
+        lastPosition = currentPosition;
+        currentPosition = direction;
+        tweener.AddTween(transform, lastPosition, direction, moveDuration);
     }
 }

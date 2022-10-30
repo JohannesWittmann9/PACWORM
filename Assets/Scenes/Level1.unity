@@ -2248,6 +2248,7 @@ GameObject:
   - component: {fileID: 394082132}
   - component: {fileID: 394082133}
   - component: {fileID: 394082134}
+  - component: {fileID: 394082135}
   m_Layer: 0
   m_Name: BirdGreen
   m_TagString: Ghost
@@ -2263,8 +2264,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 394082128}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8.5, y: -7, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalPosition: {x: 7.5, y: -6.5, z: 0}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 185372221}
@@ -2402,6 +2403,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff9e76bf18de63f4984540fb53cc26ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &394082135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 394082128}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2beb02a5cd68b8f4da427fd6d3c16005, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveDuration: 0.5
+  tweener: {fileID: 1732952294}
+  behaviour: 2
+  durationToStartPos: 5
 --- !u!1 &418036519
 GameObject:
   m_ObjectHideFlags: 0
@@ -3274,6 +3291,7 @@ GameObject:
   - component: {fileID: 420370444}
   - component: {fileID: 420370445}
   - component: {fileID: 420370446}
+  - component: {fileID: 420370447}
   m_Layer: 0
   m_Name: BirdYellow
   m_TagString: Ghost
@@ -3289,8 +3307,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 420370440}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 11.5, y: -9, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalPosition: {x: 12.5, y: -9.5, z: 0}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 901178351}
@@ -3428,6 +3446,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff9e76bf18de63f4984540fb53cc26ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &420370447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420370440}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2beb02a5cd68b8f4da427fd6d3c16005, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveDuration: 0.5
+  tweener: {fileID: 1732952294}
+  behaviour: 4
+  durationToStartPos: 5
 --- !u!1 &464560393
 GameObject:
   m_ObjectHideFlags: 0
@@ -10242,6 +10276,7 @@ GameObject:
   - component: {fileID: 1159190453}
   - component: {fileID: 1159190452}
   - component: {fileID: 1159190454}
+  - component: {fileID: 1159190455}
   m_Layer: 0
   m_Name: BirdBlue
   m_TagString: Ghost
@@ -10257,8 +10292,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1159190448}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 11.51, y: -4.37, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalPosition: {x: 7.5, y: -9.5, z: 0}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 666882638}
@@ -10396,6 +10431,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff9e76bf18de63f4984540fb53cc26ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1159190455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1159190448}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2beb02a5cd68b8f4da427fd6d3c16005, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveDuration: 0.5
+  tweener: {fileID: 1732952294}
+  behaviour: 1
+  durationToStartPos: 5
 --- !u!1 &1225575803
 GameObject:
   m_ObjectHideFlags: 0
@@ -18797,7 +18848,6 @@ MonoBehaviour:
   redBird: {fileID: 1888443426}
   yellowBird: {fileID: 420370440}
   greenBird: {fileID: 394082128}
-  tweener: {fileID: 1732952294}
 --- !u!1 &1742432007
 GameObject:
   m_ObjectHideFlags: 0
@@ -21125,6 +21175,7 @@ GameObject:
   - component: {fileID: 1888443430}
   - component: {fileID: 1888443431}
   - component: {fileID: 1888443432}
+  - component: {fileID: 1888443433}
   m_Layer: 0
   m_Name: BirdRed
   m_TagString: Ghost
@@ -21140,8 +21191,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1888443426}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 11.5, y: -7, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalPosition: {x: 12.5, y: -6.5, z: 0}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1641742270}
@@ -21279,6 +21330,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff9e76bf18de63f4984540fb53cc26ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1888443433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1888443426}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2beb02a5cd68b8f4da427fd6d3c16005, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveDuration: 0.5
+  tweener: {fileID: 1732952294}
+  behaviour: 3
+  durationToStartPos: 5
 --- !u!1 &2057989011
 GameObject:
   m_ObjectHideFlags: 0
@@ -27238,7 +27305,7 @@ PrefabInstance:
       objectReference: {fileID: 1461931954}
     - target: {fileID: 7031651645696206189, guid: 6a4b0e152c3e502478619414041e4f74, type: 3}
       propertyPath: moveDuration
-      value: 0.1
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects:
