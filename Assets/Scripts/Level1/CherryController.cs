@@ -12,19 +12,27 @@ public class CherryController : MonoBehaviour
 
     private GameObject cherry;
 
-
     // Start is called before the first frame update
     void Start()
     {
         cherry = GameObject.Find("BonusCherry");
         cherry.SetActive(false);
-        InvokeRepeating("SpawnCherry", 0, spawnRateInSeconds);
     }
 
     // Update is called once per frame
     void Update()
     {
         if (!tweener.TweenExists(cherry.transform)) cherry.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        InvokeRepeating("SpawnCherry", 0, spawnRateInSeconds);
+    }
+
+    private void OnDisable()
+    {
+        CancelInvoke();
     }
 
     private void SpawnCherry()
@@ -37,43 +45,42 @@ public class CherryController : MonoBehaviour
     {
         System.Random rand = new System.Random();
         int side = rand.Next(1, 5);
-        Vector3 camPos = mainCamera.transform.position;
-        float cameraYHalf = mainCamera.orthographicSize;
-        float cameraXHalf = cameraYHalf * mainCamera.aspect;
-        Vector3 left = new Vector3(0 - cameraXHalf - 1, 0, 0);
-        Vector3 bottom = new Vector3(0, 0 - cameraYHalf - 1, 0);
-        Vector3 right = new Vector3(0 + cameraXHalf + 1, 0, 0);
-        Vector3 top = new Vector3(0, 0 + cameraYHalf + 1, 0);
+        Vector3 posCam = mainCamera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f));
+        Vector3 left = Vector3.zero;
+        Vector3 bottom = Vector3.zero;
+        Vector3 right = Vector3.zero;
+        Vector3 top = Vector3.zero;
         Vector3 startPoint = Vector3.zero;
-        float y, x;
+        float factor = UnityEngine.Random.Range(0, 1.0f);
         switch (side)
         {
             case 1:
                 // left
-                y = UnityEngine.Random.Range(cameraYHalf, -cameraYHalf);
-                startPoint = new Vector3(left.x, y);
+                left = mainCamera.ViewportToWorldPoint(new Vector3(-0.1f, factor, 0));
+                startPoint = new Vector3(left.x, left.y);
                 break;
             case 2:
                 // bottom
-                x = UnityEngine.Random.Range(cameraXHalf, -cameraXHalf);
-                startPoint = new Vector3(x, bottom.y);
+                bottom = mainCamera.ViewportToWorldPoint(new Vector3(factor, -0.1f, 0));
+                startPoint = new Vector3(bottom.x, bottom.y);
                 break;
             case 3:
                 // right
-                y = UnityEngine.Random.Range(cameraYHalf, -cameraYHalf);
-                startPoint = new Vector3(right.x, y);
+                right = mainCamera.ViewportToWorldPoint(new Vector3(1.1f, factor, 0));
+                startPoint = new Vector3(right.x, right.y);
                 break;
             case 4:
                 // top
-                x = UnityEngine.Random.Range(cameraXHalf, -cameraXHalf);
-                startPoint = new Vector3(x, top.y);
+                top = mainCamera.ViewportToWorldPoint(new Vector3(factor, 1.1f, 0));
+                startPoint = new Vector3(top.x, top.y);
                 break;
             default:
                 break;
         }
-
+        
         cherry.transform.position = startPoint;
-        Vector3 endPos = Vector3.zero - startPoint;
+        Vector3 middlePoint = new Vector3(posCam.x, posCam.y, 0);
+        Vector3 endPos = middlePoint - (startPoint - middlePoint);
         tweener.AddTween(cherry.transform, cherry.transform.position, endPos, speed);
     }
 

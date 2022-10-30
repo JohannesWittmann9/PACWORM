@@ -9,15 +9,26 @@ public class PacStudentController : MonoBehaviour
     [SerializeField] AudioClip pacMovementClip;
     [SerializeField] AudioClip pacEatClip;
     [SerializeField] AudioClip pacWallClip;
-    [SerializeField] ParticleSystem particleSys;
+    [SerializeField] AudioClip pacDeadClip;
+    [SerializeField] ParticleSystem pacPS;
+    [SerializeField] ParticleSystem deathPS;
+    [SerializeField] ParticleSystem bumpPS;
 
     private GameObject[] tiles;
-    private GameObject[] collectibles;
+    private List<GameObject> collectibles;
     private Tweener tweener;
     private AudioSource audioSource;
     private Animator animator;
     private KeyCode lastInput;
     private KeyCode currentInput;
+    private bool hasBumped = false;
+    private int pointsForPellet = 10;
+    private int pointsForCherry = 100;
+    private int pointsForGhost = 300;
+    private Vector3 startPosition;
+
+    private GameObject managers;
+    private GameManager gameManager;
    
 
     // Start is called before the first frame update
@@ -25,13 +36,18 @@ public class PacStudentController : MonoBehaviour
     {
         tweener = GetComponent<Tweener>();
         animator = GetComponent<Animator>();
+        animator.SetBool("normalState", true);
         audioSource = GetComponent<AudioSource>();
+
+        managers = GameObject.Find("Managers");
+        gameManager = managers.GetComponent<GameManager>();
+
+        startPosition = transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
-
         if (Input.GetKey(KeyCode.W))
         {
             lastInput = KeyCode.W;
@@ -54,18 +70,31 @@ public class PacStudentController : MonoBehaviour
             PlayMovementClip();
         }
 
-        if(lastInput != KeyCode.None)
+        if (lastInput != KeyCode.None)
         {
-            bool canWalk = ComputeInput(lastInput);
-            if (!canWalk) ComputeInput(currentInput);
+            Vector3 newPos = Vector3.zero;
+            bool canWalk = ComputeInput(lastInput, ref newPos);
+            if (!canWalk)
+            {
+                canWalk = ComputeInput(currentInput, ref newPos);
+                Vector3 pos = newPos + ((this.transform.position - newPos) / 2);
+                if (!canWalk && !hasBumped) PlayWallBump(pos);
+            }
+            else
+            {
+                hasBumped = false;
+            }
         }
-        
+
+
     }
+
 
     private void FixedUpdate()
     {
         TryCollectItem();
     }
+
 
     private void PlayMovementClip()
     {
@@ -76,14 +105,6 @@ public class PacStudentController : MonoBehaviour
         }
     }
 
-    private void PlayWallClip()
-    {
-        if (!audioSource.isPlaying)
-        {
-            audioSource.clip = pacWallClip;
-            audioSource.Play();
-        }
-    }
 
     private void PlayCollectClip()
     {
@@ -110,9 +131,10 @@ public class PacStudentController : MonoBehaviour
 
     private GameObject GetCollectible()
     { 
-        collectibles = GameObject.FindGameObjectsWithTag("Collectible");
+        collectibles = new List<GameObject>(GameObject.FindGameObjectsWithTag("Collectible"));
+        collectibles.AddRange(new List<GameObject>(GameObject.FindGameObjectsWithTag("Pellet")));
 
-        for (int i = 0; i < collectibles.Length; i++)
+        for (int i = 0; i < collectibles.Count; i++)
         {
             GameObject obj = collectibles[i];
             if(obj != null)
@@ -128,7 +150,7 @@ public class PacStudentController : MonoBehaviour
         return null;
     }
 
-    private bool ComputeInput(KeyCode input)
+    private bool ComputeInput(KeyCode input, ref Vector3 newPos)
     {
         if (!tweener.TweenExists(transform))
         {
@@ -136,7 +158,6 @@ public class PacStudentController : MonoBehaviour
             animator.SetBool("walkDown", false);
             animator.SetBool("walkRight", false);
             animator.SetBool("walkLeft", false);
-            Vector3 newPos;
 
             switch (input)
             {
@@ -155,6 +176,8 @@ public class PacStudentController : MonoBehaviour
                     newPos = new Vector3(transform.position.x - 1, transform.position.y);
                     if (IsWalkable(newPos))
                     {
+                        ComputeTeleporters(ref newPos);
+
                         currentInput = input;
                         tweener.AddTween(transform, transform.position, newPos, moveDuration);
                         animator.SetBool("walkLeft", true);
@@ -178,6 +201,8 @@ public class PacStudentController : MonoBehaviour
                     newPos = new Vector3(transform.position.x + 1, transform.position.y);
                     if (IsWalkable(newPos))
                     {
+                        ComputeTeleporters(ref newPos);
+                        
                         currentInput = input;
                         tweener.AddTween(transform, transform.position, newPos, moveDuration);
                         animator.SetBool("walkRight", true);
@@ -200,13 +225,132 @@ public class PacStudentController : MonoBehaviour
         GameObject item = GetCollectible();
         if (item != null)
         {
-            item.SetActive(false);
-            PlayCollectClip();
+            CollectItem(item);
         }
     }
 
     private void PlayParticles()
     {
-        particleSys.Play();
+        pacPS.Play();
+    }
+
+    private void PlayWallBump(Vector3 pos)
+    {
+        audioSource.Stop();
+        audioSource.clip = pacWallClip;
+        audioSource.Play();
+        bumpPS.transform.position = pos;
+        bumpPS.Play();
+        hasBumped = true;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        GameObject collider = collision.gameObject;
+        if (collider.CompareTag("BonusCherry"))
+        {
+            CollectItem(collider);
+        }
+        if (collider.CompareTag("Ghost"))
+        {
+            bool normalState = animator.GetBool("normalState");
+            bool powerState = animator.GetBool("powerState");
+            if (normalState)
+            {
+                bool gameOver = gameManager.DecreaseLiveCount();
+                tweener.StopTween(transform);
+                deathPS.transform.position = transform.position;
+                deathPS.Play();
+                if (!gameOver)
+                {
+                    transform.position = startPosition;
+                    ResetInput();
+                }
+                
+            }
+            else if (powerState)
+            {
+                gameManager.SetDeadState(collider);
+                gameManager.AddPoints(pointsForGhost);
+            }
+        }
+
+    }
+
+    private void CollectItem(GameObject item)
+    {
+        item.SetActive(false);
+        int points = 0;
+        if (item.CompareTag("BonusCherry"))
+        {
+            points = pointsForCherry;
+        }
+        else if (item.CompareTag("Pellet"))
+        {
+            points = pointsForPellet;
+        }
+        else if (item.CompareTag("Collectible"))
+        {
+            gameManager.SetScaredState();
+            ResetAnimatorStates();
+            animator.SetBool("powerState", true);
+            Timer timer = managers.GetComponent<Timer>();
+            timer.StartTimer(10);
+        }
+
+        gameManager.AddPoints(points);
+        PlayCollectClip();
+    }
+
+    private void ResetAnimatorStates()
+    {
+        animator.SetBool("powerState", false);
+        animator.SetBool("normalState", false);
+        animator.SetBool("deathState", false);
+    }
+
+    private void ResetInput()
+    {
+        animator.SetBool("walkLeft", false);
+        animator.SetBool("walkRight", false);
+        animator.SetBool("walkUp", false);
+        animator.SetBool("walkDown", false);
+        currentInput = KeyCode.None;
+        lastInput = KeyCode.None;
+        pacPS.Stop();
+    }
+
+    public void SetDeadState()
+    {
+        ResetAnimatorStates();
+        animator.SetBool("deathState", true);
+        audioSource.clip = pacDeadClip;
+        audioSource.Play();
+    }
+
+    public void SetNormalState()
+    {
+        ResetAnimatorStates();
+        animator.SetBool("normalState", true);
+    }
+
+    private void ComputeTeleporters(ref Vector3 newPos)
+    {
+        Vector3 edge = GameObject.Find("LevelMap").GetComponent<LevelGenerator>().topLeft;
+        float size = 28.0f;
+        float xLeft = edge.x;
+        float xRight = edge.x + size;
+
+        if (newPos.x < xLeft)
+        {
+            newPos = new Vector3(xRight - 1, newPos.y, 0);
+            transform.position = new Vector3(xRight, transform.position.y, 0);
+        }
+        else if (newPos.x > xRight)
+        {
+            newPos = new Vector3(xLeft + 1, newPos.y, 0);
+            transform.position = new Vector3(xLeft, transform.position.y, 0);
+        }
+
     }
 }
