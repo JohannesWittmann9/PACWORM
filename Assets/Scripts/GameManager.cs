@@ -213,7 +213,7 @@ public class GameManager : MonoBehaviour
     {
         if(obj.Equals(gameObject))
         {
-            scaredTimer.text = "Scared: 10";
+            scaredTimer.text = "Power Mode: 10";
             scaredTimer.enabled = false;
             scaredTimerVal = 10;
             Actions.OnTimerChange -= IncrementTimer;
@@ -229,7 +229,7 @@ public class GameManager : MonoBehaviour
         if (obj.Equals(gameObject))
         {
             scaredTimerVal -= 1;
-            scaredTimer.text = "Scared: " + scaredTimerVal;
+            scaredTimer.text = "Power Mode: " + scaredTimerVal;
             if (scaredTimerVal <= 3)
             {
                 SetTransitionState();

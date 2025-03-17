@@ -28,10 +28,13 @@ public class CameraController : MonoBehaviour
         float cameraRightBorder = cameraPos.x + halfSizeX;
         float cameraTopBorder = cameraPos.y + halfSizeY;
         float cameraBottomBorder = cameraPos.y - halfSizeY;
+        
+        //Follow
+        mainCamera.transform.position = new Vector3(playerPos.x, playerPos.y, cameraPos.z);
 
-        if (playerPos.x > cameraRightBorder) mainCamera.transform.position = new Vector3(cameraPos.x + xOffset, cameraPos.y, cameraPos.z);
-        if (playerPos.x < cameraLeftBorder) mainCamera.transform.position = new Vector3(cameraPos.x - xOffset, cameraPos.y, cameraPos.z);
-        if (playerPos.y > cameraTopBorder) mainCamera.transform.position = new Vector3(cameraPos.x, cameraPos.y + (2 * halfSizeY), cameraPos.z);
-        if (playerPos.y < cameraBottomBorder) mainCamera.transform.position = new Vector3(cameraPos.x, cameraPos.y - (2 * halfSizeY), cameraPos.z);
+        //if (playerPos.x > cameraRightBorder) mainCamera.transform.position = new Vector3(cameraPos.x + xOffset, cameraPos.y, cameraPos.z);
+        //if (playerPos.x < cameraLeftBorder) mainCamera.transform.position = new Vector3(cameraPos.x - xOffset, cameraPos.y, cameraPos.z);
+        //if (playerPos.y > cameraTopBorder) mainCamera.transform.position = new Vector3(cameraPos.x, cameraPos.y + (2 * halfSizeY), cameraPos.z);
+        //if (playerPos.y < cameraBottomBorder) mainCamera.transform.position = new Vector3(cameraPos.x, cameraPos.y - (2 * halfSizeY), cameraPos.z);
     }
 }

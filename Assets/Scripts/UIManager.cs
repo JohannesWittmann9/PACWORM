@@ -83,7 +83,11 @@ public class UIManager : MonoBehaviour
 
     public void QuitGame()
     {
+    	#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
+        #else
+        Application.Quit(); // This will exit the app in a built version
+        #endif
     }
 
     private void SetHighscore()
